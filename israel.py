@@ -1,3 +1,4 @@
+from urllib3.exceptions import InsecureRequestWarning
 import re
 import urllib3
 from json import loads
@@ -9,8 +10,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from openpyxl import Workbook, load_workbook
+
 http = urllib3.PoolManager(cert_reqs="CERT_NONE")
-from urllib3.exceptions import InsecureRequestWarning
 
 urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -25,15 +27,12 @@ newlist = []
 for row in body:
     arr = []
     cols = row.find_all("td")
-
     cols = [ele.text.strip() for ele in cols]
-    print(cols)
     newlist.append([ele for ele in cols])
-# print(newlist)
+# ['', '21/02/2020', '2', '2', '', '', '']
 
 newlist.remove([""])
 [r.pop(0) for r in newlist]
-
 newlist = np.array(newlist)
 
 for i in range(len(newlist)):
@@ -41,14 +40,33 @@ for i in range(len(newlist)):
         if newlist[i][j] == "":
             newlist[i][j] = "0"
             # newlist[i][j] = 0
-# new = map(lambda x: list(x.replace("", "0")), newlist)
-# print(list(new))
-# newlist = [r.replace("", "0") for r in newlist]
 
-# a = [map(lambda r: r, key) for key in newlist]
+title = ['Date', "Total Cases", "New Cases",
+         "בינוני Moderate", "קשה Severe", "נפטרו Deceased"]
+# print(newlist)
+df = pd.DataFrame(newlist, columns=title)
+print(df)
 
-# a = map(lambda r: r, newlist)
-# print(list(a))
+lastrow = newlist[-1]  # get the last row
 
-with open("israel.csv", "w") as f:
-    [f.write(str(key) + "\n\n") for key in newlist]
+lastrow = pd.DataFrame(lastrow)
+# print(lastrow)
+
+
+writer = pd.ExcelWriter(
+    '/Users/user/PycharmProjects/soldgame/fun/data.xlsx', engine='openpyxl')
+# try to open an existing workbook
+writer.book = load_workbook('data.xlsx')
+# copy existing sheets
+writer.sheets = dict((ws.title, ws) for ws in writer.book.worksheets)
+# read existing file
+reader = pd.read_excel('data.xlsx')
+# print(len(reader)+1)
+# write out the new sheet
+df.to_excel(writer, index=False, header=False, startrow=1)
+
+writer.close()
+
+# with open("/Users/user/PycharmProjects/soldgame/fun/data.csv", "w") as f:
+#     f.write(str(lastrow))
+#[f.write(str(key) + "\n\n") for key in newlist]
