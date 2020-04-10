@@ -54,7 +54,7 @@ lastrow = pd.DataFrame(lastrow)
 
 
 writer = pd.ExcelWriter(
-    '/Users/user/PycharmProjects/soldgame/fun/data.xlsx', engine='openpyxl')
+    '/Users/user/Documents/Web/charts and graphs/apexchart/backend/data.xlsx', engine='openpyxl')
 # try to open an existing workbook
 writer.book = load_workbook('data.xlsx')
 # copy existing sheets
